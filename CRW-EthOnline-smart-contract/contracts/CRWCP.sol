@@ -26,6 +26,10 @@ contract CRWCP is ERC20, AccessControl {
 
     /// @dev reserving a restaurant appointment and saving it as an entry
     function reserve(address _restaurant, uint256 _timestamp) public {
+        require(
+            hasRole(RESTAURANT, _restaurant),
+            "Restaurant is not whitelisted"
+        );
         reservation[msg.sender][_restaurant] = _timestamp;
     }
 
