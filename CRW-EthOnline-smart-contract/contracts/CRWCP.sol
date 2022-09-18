@@ -7,13 +7,19 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract CRWCP is ERC20, AccessControl {
     bytes32 public constant RESTAURANT = keccak256("RESTAURANT");
-    // percentage of the total sale amount to be converted in the token. It is as set as a constant. If we want to have the ability to change it, then no constant and a new function should be created for changing this
-    uint16 public constant percentage = 5;
+    uint16 public percentage = 5;
     mapping(address => mapping(address => uint)) reservation;
 
     constructor() ERC20("CRW CP", "CRW CP") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RESTAURANT, msg.sender);
+    }
+
+    function updatePercentage(uint16 _percentage)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        percentage = _percentage;
     }
 
     /// @dev adding restaurants that can call the verify functions
