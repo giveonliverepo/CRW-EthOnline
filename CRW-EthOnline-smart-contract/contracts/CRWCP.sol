@@ -12,6 +12,8 @@ contract CRWCP is ERC20, AccessControl {
     uint16 public percentage = 5;
     mapping(address => mapping(address => uint)) reservation;
 
+    event Mint(address indexed receiver, uint256 _amount);
+
     constructor() ERC20("CRW CP", "CRW CP") {
         // matic/usd
         priceFeed = AggregatorV3Interface(
@@ -54,6 +56,8 @@ contract CRWCP is ERC20, AccessControl {
         require(sent, "Failed to send Matic");
 
         _mint(msg.sender, _amount);
+
+        emit Mint(msg.sender, _amount);
     }
 
     /// @dev adding restaurants that can call the verify functions
@@ -72,6 +76,7 @@ contract CRWCP is ERC20, AccessControl {
     }
 
     /// @dev verifying customers' sale and transferring the CRW CP token to the customer in proportion to the sale
+    /// @notice the amount must have 16 decimals
     function verify(address _customer, uint256 _amount)
         public
         onlyRole(RESTAURANT)
@@ -82,6 +87,8 @@ contract CRWCP is ERC20, AccessControl {
         );
         uint256 tokenTransfer = (_amount * percentage) / 100;
         _mint(_customer, tokenTransfer);
+
+        emit Mint(_customer, tokenTransfer);
     }
 
     receive() external payable {}
