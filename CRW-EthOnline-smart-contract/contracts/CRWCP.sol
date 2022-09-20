@@ -4,15 +4,33 @@ pragma solidity ^0.8.17;
 // what kind of validation do we need to put on the verify function? restaurants can't assign to themselves; whitelist to who the token can be sent
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract CRWCP is ERC20, AccessControl {
+    AggregatorV3Interface internal priceFeed;
     bytes32 public constant RESTAURANT = keccak256("RESTAURANT");
     uint16 public percentage = 5;
     mapping(address => mapping(address => uint)) reservation;
 
     constructor() ERC20("CRW CP", "CRW CP") {
+        // matic/usd
+        priceFeed = AggregatorV3Interface(
+            0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada
+        );
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RESTAURANT, msg.sender);
+    }
+
+    function getLatestPrice() public view returns (int) {
+        (
+            ,
+            /*uint80 roundID*/
+            int price, /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
+            ,
+            ,
+
+        ) = priceFeed.latestRoundData();
+        return price;
     }
 
     function updatePercentage(uint16 _percentage)
@@ -20,6 +38,22 @@ contract CRWCP is ERC20, AccessControl {
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         percentage = _percentage;
+    }
+
+    /// @dev top-up functionality to buy tokens in exchange of chain native currency
+    /// @notice The value of 1 token is equal to 1 dollar. This is calculated by using a price feed matic/usd
+    function buyToken(uint256 _amount) public payable {
+        int conversionRatio = 76631200 * 1e10;
+        require(_amount >= 1 * 1e16, "Minimum is 1 token");
+        require(
+            msg.value >= _amount / uint256(conversionRatio),
+            "Not enough amount"
+        );
+
+        (bool sent, ) = address(this).call{value: msg.value}("");
+        require(sent, "Failed to send Matic");
+
+        _mint(msg.sender, _amount);
     }
 
     /// @dev adding restaurants that can call the verify functions
@@ -49,4 +83,6 @@ contract CRWCP is ERC20, AccessControl {
         uint256 tokenTransfer = (_amount * percentage) / 100;
         _mint(_customer, tokenTransfer);
     }
+
+    receive() external payable {}
 }
