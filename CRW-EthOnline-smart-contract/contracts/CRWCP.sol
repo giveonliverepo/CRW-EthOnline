@@ -15,9 +15,9 @@ contract CRWCP is ERC20, AccessControl {
     event Mint(address indexed receiver, uint256 _amount);
 
     constructor() ERC20("CRW CP", "CRW CP") {
-        // matic/usd
+        // eth/usd
         priceFeed = AggregatorV3Interface(
-            0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada
+            0x57241A37733983F97C4Ab06448F244A1E0Ca0ba8
         );
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RESTAURANT, msg.sender);

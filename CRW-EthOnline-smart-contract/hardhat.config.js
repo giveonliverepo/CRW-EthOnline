@@ -17,11 +17,27 @@ module.exports = {
       url: process.env.ALCHEMY_MUMBAI_URL || "",
       accounts: [process.env.PRIVATE_KEY],
     },
+    "optimism-goerli": {
+      chainId: 420,
+      url: process.env.ALCHEMY_OPTGOERLI_MUMBAI_URL || "",
+      accounts: [process.env.PRIVATE_KEY],
+    },
   },
   etherscan: {
     apiKey: {
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
+      "optimism-goerli": process.env.OPTGOERLI_API_KEY,
     },
+    customChains: [
+      {
+        network: "optimism-goerli",
+        chainId: 420,
+        urls: {
+          apiURL: "https://api-goerli-optimism.etherscan.io/api",
+          browserURL: "https://goerli-optimism.etherscan.io",
+        },
+      },
+    ],
   },
   namedAccounts: {
     deployer: {
