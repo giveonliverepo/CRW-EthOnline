@@ -45,7 +45,7 @@ contract CRWCP is ERC20, AccessControl {
     /// @dev top-up functionality to buy tokens in exchange of chain native currency
     /// @notice The value of 1 token is equal to 1 dollar. This is calculated by using a price feed matic/usd
     function buyToken(uint256 _amount) public payable {
-        int conversionRatio = 76631200 * 1e10;
+        int conversionRatio = getLatestPrice() * 1e10;
         require(_amount >= 1 * 1e16, "Minimum is 1 token");
         require(
             msg.value >= _amount / uint256(conversionRatio),
@@ -61,11 +61,10 @@ contract CRWCP is ERC20, AccessControl {
     }
 
     /// @dev adding restaurants that can call the verify functions
-    function addRestaurant(address _newRestaurant)
-        public
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    /// @notice users receive 3 tokens for each new restaurant added
+    function addRestaurant(address _newRestaurant) public {
         _grantRole(RESTAURANT, _newRestaurant);
+        _mint(msg.sender, 3e18);
     }
 
     /// @dev reserving a restaurant appointment and saving it as an entry
